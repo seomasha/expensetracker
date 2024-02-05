@@ -1,42 +1,11 @@
 import { createContext, useReducer } from "react";
 
 
-const DUMMY_EXPENSES = [
-    {
-        id: 'e1',
-        description: 'A pair of shoes',
-        amount: 59.99,
-        date: new Date('2023-12-19')
-    },
-    {
-        id: 'e2',
-        description: 'A pair of trousers',
-        amount: 89.99,
-        date: new Date('2024-01-22')
-    },
-    {
-        id: 'e3',
-        description: 'Bananas',
-        amount: 5.99,
-        date: new Date('2024-01-08')
-    },
-    {
-        id: 'e4',
-        description: 'A book',
-        amount: 14.99,
-        date: new Date('2024-12-19')
-    },
-    {
-        id: 'e5',
-        description: 'A laptop',
-        amount: 599.99,
-        date: new Date('2023-12-19')
-    },
-]
 
 export const ExpensesContext = createContext({
     expenses: [],
     addExpense: ({description, amount, date}) => {},
+    setExpenses: (expenses) => {},
     deleteExpense: (id) => {},
     updateExpense: (id, {description, amount, date}) => {}
 });
@@ -46,6 +15,8 @@ function expensesReducer(state, action) {
         case 'ADD':
             const id = new Date().toString() + Math.random().toString();
             return [{...action.payload, id: id}, ...state]
+        case 'SET':
+            return action.payload;
         case 'UPDATE':
             const updatableExpenseIndex = state.findIndex((expense) => expense.id === action.payload.id);
             const updatableExpense = state[updatableExpenseIndex];
@@ -64,10 +35,14 @@ function expensesReducer(state, action) {
 
 function ExpensesContextProvider({children}) {
 
-    const [expensesState, dispatch] = useReducer(expensesReducer, DUMMY_EXPENSES);
+    const [expensesState, dispatch] = useReducer(expensesReducer, []);
 
     function addExpense(expenseData) {
         dispatch({type: 'ADD', payload: expenseData});
+    }
+
+    function setExpenses(expenses) {
+        dispatch({type: 'SET', payload: expenses})
     }
 
     function deleteExpense (id) {
@@ -80,6 +55,7 @@ function ExpensesContextProvider({children}) {
 
     const value = {
         expenses: expensesState,
+        setExpenses: setExpenses,
         addExpense: addExpense,
         deleteExpense: deleteExpense,
         updateExpense: updateExpense
